@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Spider Movie List</title>
+  <title>Movie List</title>
 
   <style>
     body {
@@ -17,19 +17,13 @@
     .container {
       background: #0b1d51;
       padding: 25px;
-      width: 320px;
+      width: 330px;
       border-radius: 15px;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       border: 3px solid red;
     }
 
-    h2 {
-      text-align: center;
-      color: #ff3b3b;
-      text-shadow: 1px 1px black;
-    }
-
-    h3 {
+    h2, h3 {
       text-align: center;
     }
 
@@ -50,7 +44,6 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.3s;
     }
 
     button:hover {
@@ -64,13 +57,12 @@
 
     li {
       background: #1e3a8a;
-      margin: 6px 0;
+      margin: 8px 0;
       padding: 10px;
       border-radius: 10px;
       border-left: 5px solid red;
     }
 
-    /* CLICKABLE STARS (top) */
     .stars span {
       font-size: 22px;
       cursor: pointer;
@@ -86,7 +78,20 @@
     }
 
     .empty {
-      color: #4da6ff; 
+      color: #4da6ff;
+    }
+
+    .delete-btn {
+      margin-top: 5px;
+      background: black;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover {
+      background: #333;
     }
 
     .spider {
@@ -100,7 +105,7 @@
 
 <div class="container">
   <div class="spider">🕷️</div>
-  <h2>Movie List</h2>
+  <h2>Spider Movie List</h2>
 
   <input id="title" placeholder="Movie Title">
   <input id="year" placeholder="Year">
@@ -121,7 +126,7 @@
     <span onclick="setRating(5)">★</span>
   </div>
 
-  <button onclick="addMovie()">Add Movie 🕸️</button>
+  <button onclick="addMovie()">Add / Update Movie 🕸️</button>
 
   <h3>Movie List</h3>
   <ul id="movieList"></ul>
@@ -161,19 +166,42 @@
       return;
     }
 
-    const newMovie = {
-      title,
-      year,
-      genre,
-      rating: currentRating
-    };
-
     let movies = getMovies();
-    movies.push(newMovie);
+
+    const index = movies.findIndex(m => m.title.toLowerCase() === title.toLowerCase());
+
+    if (index !== -1) {
+      let old = movies[index];
+      let newRating = Math.round((old.rating + currentRating) / 2);
+
+      movies[index] = {
+        title,
+        year,
+        genre,
+        rating: newRating
+      };
+
+    } else {
+      movies.push({
+        title,
+        year,
+        genre,
+        rating: currentRating
+      });
+    }
 
     saveMovies(movies);
     displayMovies();
     clearInputs();
+  }
+
+  function deleteMovie(index) {
+    if (confirm("Are you sure you want to delete this movie? 🕷️")) {
+      let movies = getMovies();
+      movies.splice(index, 1);
+      saveMovies(movies);
+      displayMovies();
+    }
   }
 
   function displayMovies() {
@@ -182,7 +210,7 @@
 
     const movies = getMovies();
 
-    movies.forEach(movie => {
+    movies.forEach((movie, index) => {
       const li = document.createElement("li");
 
       let starsHTML = "";
@@ -198,6 +226,8 @@
       li.innerHTML = `
         ${movie.title} (${movie.year}) - ${movie.genre}<br>
         ${starsHTML} (${movie.rating}/5)
+        <br>
+        <button class="delete-btn" onclick="deleteMovie(${index})">Delete ❌</button>
       `;
 
       list.appendChild(li);
