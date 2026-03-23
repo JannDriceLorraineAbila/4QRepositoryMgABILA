@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spider Movie List</title>
+
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(135deg, #ff0000, #001f5c);
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+      color: white;
+    }
+
+    .container {
+      background: #0b1d51;
+      padding: 25px;
+      width: 320px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      border: 3px solid red;
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff3b3b;
+      text-shadow: 1px 1px black;
+    }
+
+    h3 {
+      text-align: center;
+    }
+
+    input, select, button {
+      width: 100%;
+      margin: 6px 0;
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    input, select {
+      background: #e6f0ff;
+    }
+
+    button {
+      background: red;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ff4d4d;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #1e3a8a;
+      margin: 6px 0;
+      padding: 10px;
+      border-radius: 10px;
+      border-left: 5px solid red;
+    }
+
+    /* CLICKABLE STARS (top) */
+    .stars span {
+      font-size: 22px;
+      cursor: pointer;
+      color: gray;
+    }
+
+    .stars .active {
+      color: gold;
+    }
+
+    .filled {
+      color: gold;
+    }
+
+    .empty {
+      color: #4da6ff; 
+    }
+
+    .spider {
+      text-align: center;
+      font-size: 30px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="spider">🕷️</div>
+  <h2>Movie List</h2>
+
+  <input id="title" placeholder="Movie Title">
+  <input id="year" placeholder="Year">
+
+  <select id="genre">
+    <option>Action</option>
+    <option>Comedy</option>
+    <option>Drama</option>
+    <option>Horror</option>
+    <option>Romcom</option>
+  </select>
+
+  <div class="stars" id="starRating">
+    <span onclick="setRating(1)">★</span>
+    <span onclick="setRating(2)">★</span>
+    <span onclick="setRating(3)">★</span>
+    <span onclick="setRating(4)">★</span>
+    <span onclick="setRating(5)">★</span>
+  </div>
+
+  <button onclick="addMovie()">Add Movie 🕸️</button>
+
+  <h3>Movie List</h3>
+  <ul id="movieList"></ul>
+</div>
+
+<script>
+  let currentRating = 0;
+
+  function setRating(rating) {
+    currentRating = rating;
+    const stars = document.querySelectorAll("#starRating span");
+
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.add("active");
+      } else {
+        star.classList.remove("active");
+      }
+    });
+  }
+
+  function getMovies() {
+    return JSON.parse(localStorage.getItem("movies")) || [];
+  }
+
+  function saveMovies(movies) {
+    localStorage.setItem("movies", JSON.stringify(movies));
+  }
+
+  function addMovie() {
+    const title = document.getElementById("title").value;
+    const year = document.getElementById("year").value;
+    const genre = document.getElementById("genre").value;
+
+    if (!title || !year || currentRating === 0) {
+      alert("Fill everything first 🕷️");
+      return;
+    }
+
+    const newMovie = {
+      title,
+      year,
+      genre,
+      rating: currentRating
+    };
+
+    let movies = getMovies();
+    movies.push(newMovie);
+
+    saveMovies(movies);
+    displayMovies();
+    clearInputs();
+  }
+
+  function displayMovies() {
+    const list = document.getElementById("movieList");
+    list.innerHTML = "";
+
+    const movies = getMovies();
+
+    movies.forEach(movie => {
+      const li = document.createElement("li");
+
+      let starsHTML = "";
+
+      for (let i = 1; i <= 5; i++) {
+        if (i <= movie.rating) {
+          starsHTML += '<span class="filled">★</span>';
+        } else {
+          starsHTML += '<span class="empty">★</span>';
+        }
+      }
+
+      li.innerHTML = `
+        ${movie.title} (${movie.year}) - ${movie.genre}<br>
+        ${starsHTML} (${movie.rating}/5)
+      `;
+
+      list.appendChild(li);
+    });
+  }
+
+  function clearInputs() {
+    document.getElementById("title").value = "";
+    document.getElementById("year").value = "";
+    currentRating = 0;
+
+    document.querySelectorAll("#starRating span").forEach(star => {
+      star.classList.remove("active");
+    });
+  }
+
+  displayMovies();
+</script>
+
+</body>
+</html>
